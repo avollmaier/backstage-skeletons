@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'at.${{values.java_package_name}}'
-sourceCompatibility = '17'
+sourceCompatibility = '21'
 
 configurations {
     compileOnly {
@@ -28,10 +28,13 @@ dependencies {
     //Observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     //Dev-Tools
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
 
@@ -39,7 +42,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     //Specific Dependencies
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     //---> Add your dependencies here
 }
 
@@ -53,30 +56,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('jar') {
-    enabled = false
-}
-
-tasks.named('bootBuildImage') {
-    builder = 'paketobuildpacks/builder:base'
-
-    if(System.getenv('NATIVE_IMAGE_ENABLED') == 'enabled'){
-        println("bootBuildImage is building a native image")
-        environment = ['BP_NATIVE_IMAGE': 'true']
-    }else {
-        environment = ['BP_LIVE_RELOAD_ENABLED': 'true']
-    }
-
-    imageName = "${project.name}"
-
-    docker {
-        publishRegistry {
-            username = project.findProperty("registryUsername")
-            password = project.findProperty("registryToken")
-            url = project.findProperty("registryUrl")
-        }
-    }
-}
 
 tasks.register('printVersionName') {
     println project.version
